@@ -13,11 +13,15 @@ describe('voting-anchor-js', () => {
 
   const stateAccount = anchor.web3.Keypair.generate();
   const voteAccount = anchor.web3.Keypair.generate();
+  const updateAccount = anchor.web3.Keypair.generate();
 
   
   it('Is initialized!', async () => {
     // Add your test here.
     const program = await anchor.workspace.VotingAnchorJs;
+    await console.log("User in initializer",provider.wallet.publicKey.toString())
+    await console.log("voteAccount ",voteAccount.publicKey.toString())
+    await console.log("stateAccount",stateAccount.publicKey.toString())
     const tx = await program.rpc.initialize(
       ["proposal1","proposal2","proposal3"],
       {
@@ -39,5 +43,42 @@ describe('voting-anchor-js', () => {
       stateAccount.publicKey
     );
     await console.log(account);
+    const account2 = await program.account.voteAccount.fetch(
+      voteAccount.publicKey
+    );
+    await console.log(account2);
+  });
+
+  it('Vote for a proposal', async () => {
+    // Add your test here.
+    const program = await anchor.workspace.VotingAnchorJs;
+    await console.log("Signer in voteOnProposal",provider.wallet.publicKey.toString())
+    await console.log("Signer in voteOnProposal in BN form",provider.wallet.publicKey)
+    await console.log("voteAccount ",voteAccount.publicKey.toString())
+    await console.log("stateAccount",stateAccount.publicKey.toString())
+    const tx = await program.rpc.voteOnProposal(
+      "proposal1",
+      {
+        accounts: {
+          state : stateAccount.publicKey,
+          voteAccount : voteAccount.publicKey,
+          signer : provider.wallet.publicKey,
+        },
+        // signers: [
+        //   // stateAccount,
+        //   // voteAccount,
+        // ]
+      }
+    );
+    
+    await console.log("Your transaction signature", tx);
+    const account = await program.account.state.fetch(
+      stateAccount.publicKey
+    );
+    await console.log(account);
+    const account2 = await program.account.voteAccount.fetch(
+      voteAccount.publicKey
+    );
+    await console.log(account2);
   });
 });

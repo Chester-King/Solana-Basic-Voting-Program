@@ -1,5 +1,9 @@
+#[macro_use]
+extern crate throw;
+
 use anchor_lang::prelude::*;
 use std::vec::Vec;
+
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 // declare_id!("6ERnYjMfsr4nvawGLgy1sz3fc6qHm2Ncnpz5GApJgmFs");
@@ -20,36 +24,50 @@ pub mod voting_anchor_js {
         let update_account = &mut ctx.accounts.state;
         let vote_account = &mut ctx.accounts.vote_account;
         let signer_address = &mut ctx.accounts.signer;
+
         
+        if update_account.array.contains(&proposal_string){
+            if vote_account.voter_array.contains(&signer_address.to_account_info().key()) { 
+                // println!("yes");
+                // throw_new!("oops");
+            } else {
+                vote_account.voter_array.push(signer_address.to_account_info().key());
+                vote_account.vote_available.push(1); 
+                let prop_length = update_account.array.len();
 
-        let prop_length = update_account.array.len();
-
-        for x in 0..prop_length{
-            if update_account.array[x]==proposal_string{
-                update_account.votecountarray[x]=update_account.votecountarray[x]+1;
-                break;
+                for x in 0..prop_length{
+                    if update_account.array[x]==proposal_string{
+                        update_account.votecountarray[x]=update_account.votecountarray[x]+1;
+                        break;
+                    }
+                }
             }
+        }else{
+            // require!(1 == 0, Err);
         }
-        
+        // Little code to check out why updating of the account data is not working
+        // update_account.votecountarray.push(7);
+        // vote_account.vote_available.push(7);
+
         Ok(())
     }
     
-    pub fn winning_proposal(ctx: Context<Vote>) -> ProgramResult {
-        let update_account = &mut ctx.accounts.state;
-        let mut winning_proposal : String;
-        let mut winning_vote : u64 = 0;
-        let prop_length = update_account.array.len();
+    // pub fn winning_proposal(ctx: Context<Vote>) -> ProgramResult {
+    //     let update_account = &mut ctx.accounts.state;
+    //     let mut winning_proposal : String;
+    //     let mut winning_vote : u64 = 0;
+    //     let prop_length = update_account.array.len();
 
-        for x in 0..prop_length{
-            if winning_vote > update_account.votecountarray[x]{
-                winning_vote = update_account.votecountarray[x];
-                // winning proposal will corresponds to the maximum vote count
-            }
-        }
+    //     for x in 0..prop_length{
+    //         if winning_vote > update_account.votecountarray[x]{
+    //             winning_vote = update_account.votecountarray[x];
+    //             // winning proposal will corresponds to the maximum vote count
+    //         }
+    //     }
 
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
 }
 
@@ -76,9 +94,8 @@ pub struct Vote<'info> {
 #[account]
 pub struct VoteAccount {
 
-    pub uservote: Pubkey,
-    pub didvote: bool,
-    pub prposalstring: String,
+    pub voter_array: Vec<Pubkey>,
+    pub vote_available : Vec<u64>
 }
 
 
