@@ -12,17 +12,32 @@ describe('voting-anchor-js', () => {
   anchor.setProvider(provider);
 
   const stateAccount = anchor.web3.Keypair.generate();
+  const voteAccount = anchor.web3.Keypair.generate();
 
   
   it('Is initialized!', async () => {
     // Add your test here.
     const program = await anchor.workspace.VotingAnchorJs;
-    const tx = await program.rpc.initialize({
-      user: provider.wallet.publicKey,
-      systemProgram: SystemProgram.programId,
-      state: stateAccount.publicKey,
-    });
-    console.log("Your transaction signature", tx);
+    const tx = await program.rpc.initialize(
+      ["proposal1","proposal2","proposal3"],
+      {
+        accounts: {
+          state : stateAccount.publicKey,
+          user : provider.wallet.publicKey,
+          voteAccount : voteAccount.publicKey,
+          systemProgram : anchor.web3.SystemProgram.programId
 
+        },
+        signers: [
+          stateAccount,
+          voteAccount
+        ]
+      }
+    );
+    await console.log("Your transaction signature", tx);
+    const account = await program.account.state.fetch(
+      stateAccount.publicKey
+    );
+    await console.log(account);
   });
 });

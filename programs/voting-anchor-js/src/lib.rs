@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use std::vec::Vec;
 
-declare_id!("6ERnYjMfsr4nvawGLgy1sz3fc6qHm2Ncnpz5GApJgmFs");
+declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+// declare_id!("6ERnYjMfsr4nvawGLgy1sz3fc6qHm2Ncnpz5GApJgmFs");
 
 #[program]
 pub mod voting_anchor_js {
@@ -15,10 +16,10 @@ pub mod voting_anchor_js {
         Ok(())
     }
 
-    pub fn vote_on_proposal(ctx: Context<Vote>, proposal_string: String, signer_address: Pubkey) -> ProgramResult {
+    pub fn vote_on_proposal(ctx: Context<Vote>, proposal_string: String) -> ProgramResult {
         let update_account = &mut ctx.accounts.state;
         let vote_account = &mut ctx.accounts.vote_account;
-        
+        let signer_address = &mut ctx.accounts.signer;
         
 
         let prop_length = update_account.array.len();
@@ -54,8 +55,9 @@ pub mod voting_anchor_js {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = user, space = 16 + 40)]
+    #[account(init, payer = user, space = 16 + 80)]
     pub state: Account<'info, State>,
+    #[account(init, payer = user, space = 16 + 80)]
     pub vote_account: Account<'info, VoteAccount>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -66,7 +68,8 @@ pub struct Initialize<'info> {
 pub struct Vote<'info> {
     #[account(mut)]
     pub vote_account: Account<'info, VoteAccount>,
-    pub state: Account<'info, State>
+    pub state: Account<'info, State>,
+    pub signer: Signer<'info>
 }
 
 
