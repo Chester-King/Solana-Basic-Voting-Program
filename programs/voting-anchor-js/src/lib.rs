@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate throw;
 
 use anchor_lang::prelude::*;
 use std::vec::Vec;
@@ -86,6 +84,7 @@ pub struct Initialize<'info> {
 pub struct Vote<'info> {
     #[account(mut)]
     pub vote_account: Account<'info, VoteAccount>,
+    #[account(mut)]
     pub state: Account<'info, State>,
     pub signer: Signer<'info>
 }
